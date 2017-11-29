@@ -283,9 +283,17 @@ begin
     // Retrieve the position after the last uses item
     LastUses := UsesItems.Items[UsesItems.Count - 1];
     InsertPosition := LastUses.EndPos;
-    InsertString := ', ' + AUnitName;
-    if UsesLineWouldBeTooLong(InsertPosition, Length(InsertString)) then
+    if True then
+    begin
       InsertString := ',' + sLineBreak + '  ' + AUnitName;
+    end
+    else
+    begin
+      InsertString := ', ' + AUnitName;
+      if UsesLineWouldBeTooLong(InsertPosition, Length(InsertString)) then
+        InsertString := ',' + sLineBreak + '  ' + AUnitName;
+    end;
+
     // Insert the new unit name into the uses clause
     GxOtaInsertTextIntoEditorAtCharPos(InsertString, InsertPosition);
   end
