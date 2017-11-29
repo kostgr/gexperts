@@ -1921,7 +1921,9 @@ begin
 
         if FListMode = hlmResults then
           Result := RI;
-      end;
+      end
+      else
+        Inc(FromI);
     end
     else
       Inc(FromI);
