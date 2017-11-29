@@ -2,11 +2,11 @@
 		<PropertyGroup>
 			<ProjectGuid>{FCFABDD7-526A-4FC6-8809-72A25446A427}</ProjectGuid>
 			<MainSource>GExpertsRS2010.dpr</MainSource>
-			<Config Condition="'$(Config)'==''">Release</Config>
+			<Config Condition="'$(Config)'==''">Debug</Config>
 			<DCC_DCCCompiler>DCC32</DCC_DCCCompiler>
 			<ProjectVersion>12.0</ProjectVersion>
 		</PropertyGroup>
-		<PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
+		<PropertyGroup Condition="'$(Config)'=='Basis' or '$(Base)'!=''">
 			<Base>true</Base>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Config)'=='Release' or '$(Cfg_1)'!=''">
@@ -50,6 +50,7 @@
 			<DCC_IncludePath>..\..\gx\source\framework;..\..\gx\externalsource;..\..\gx\externalsource\abbrevia;..\..\..\synedit\source;$(DCC_IncludePath)</DCC_IncludePath>
 		</PropertyGroup>
 		<PropertyGroup Condition="'$(Cfg_2)'!=''">
+			<DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
 			<DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
 			<DCC_ResourcePath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;..\..\gx\source\framework;..\..\gx\externalsource;..\..\gx\externalsource\abbrevia;..\..\..\synedit\source;$(DCC_ResourcePath)</DCC_ResourcePath>
 			<DCC_ObjPath>$(BDS)\lib\Debug;$(BDS)\Lib\Debug\Indy10;..\..\gx\source\framework;..\..\gx\externalsource;..\..\gx\externalsource\abbrevia;..\..\..\synedit\source;$(DCC_ObjPath)</DCC_ObjPath>
@@ -488,18 +489,22 @@
 			<DCCReference Include="..\..\Source\IDE\GX_IdeManagedForm.pas"/>
 			<DCCReference Include="..\..\Source\IDE\GX_IdeFormChangeManager.pas"/>
 			<DCCReference Include="..\..\source\IDE\GX_IdeManagedFormHandler.pas"/>
+			<DCCReference Include="..\..\Source\Framework\GX_ConfigureFormEnhancements.pas">
+				<Form>frConfigureFormEnhancements</Form>
+				<DesignClass>TFrame</DesignClass>
+			</DCCReference>
 			<RcCompile Include="..\..\images\GXIcons.rc">
 				<Form>GXIcons.res</Form>
 			</RcCompile>
-			<BuildConfiguration Include="Base">
+			<BuildConfiguration Include="Basis">
 				<Key>Base</Key>
-			</BuildConfiguration>
-			<BuildConfiguration Include="Release">
-				<Key>Cfg_1</Key>
-				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 			<BuildConfiguration Include="Debug">
 				<Key>Cfg_2</Key>
+				<CfgParent>Base</CfgParent>
+			</BuildConfiguration>
+			<BuildConfiguration Include="Release">
+				<Key>Cfg_1</Key>
 				<CfgParent>Base</CfgParent>
 			</BuildConfiguration>
 		</ItemGroup>
@@ -520,8 +525,8 @@ call ..\..\buildtools\movedll.cmd "$(OUTPUTPATH)"]]></PreBuildEvent>
 						<Parameters Name="UseLauncher">False</Parameters>
 						<Parameters Name="LoadAllSymbols">True</Parameters>
 						<Parameters Name="LoadUnspecifiedSymbols">False</Parameters>
-						<Parameters Name="RunParams">-ns -np</Parameters>
-						<Parameters Name="HostApplication">C:\Delphi\Delphi2010\bin\bds.exe</Parameters>
+						<Parameters Name="RunParams"></Parameters>
+						<Parameters Name="HostApplication">C:\Program Files (x86)\Embarcadero\RAD Studio\7.0\bin\bds.exe</Parameters>
 					</Parameters>
 					<VersionInfo>
 						<VersionInfo Name="IncludeVerInfo">False</VersionInfo>
