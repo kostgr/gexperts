@@ -2396,11 +2396,19 @@ procedure TfmGrepResults.actHistoryDeleteExecute(Sender: TObject);
 var
   AIndex, ATopIndex: Integer;
   IsCurrent: Boolean;
+  CorrectItemIndex: Integer;
 begin
   AIndex := lbHistoryListIndexForHistoryMenuActions;
   if AIndex = -1 then
    Exit;
 
+  CorrectItemIndex := -1;
+  if AIndex <> lbHistoryList.ItemIndex then
+  begin
+    CorrectItemIndex := lbHistoryList.ItemIndex;
+    if AIndex < lbHistoryList.ItemIndex then
+      Dec(CorrectItemIndex);
+  end;
   IsCurrent := AIndex = lbHistoryList.ItemIndex;
   if IsCurrent then
     ClearResultsData;
@@ -2420,7 +2428,11 @@ begin
   begin
     lbHistoryList.ItemIndex := AIndex;
     ViewHistoryListItems(lbHistoryList.ItemIndex, True);
-  end ;
+  end
+  else if CorrectItemIndex >= 0 then
+  begin
+    lbHistoryList.ItemIndex := CorrectItemIndex;
+  end;
 end;
 
 procedure TfmGrepResults.actHistoryDeleteSelectedExecute(Sender: TObject);
