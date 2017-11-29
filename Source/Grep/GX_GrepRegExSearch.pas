@@ -5,7 +5,7 @@ interface
 {$I GX_CondDefine.inc}
 
 uses
-  SysUtils, Classes, RegExpr, GX_GenericUtils, GX_CodeFormatterUnicode, GX_OtaUtils;
+  SysUtils, Classes, PerlRegEx, GX_GenericUtils, GX_CodeFormatterUnicode, GX_OtaUtils;
 
 type
   TFoundEvent = procedure(LineNo, StartCol, EndCol: Integer; const Line: TGXUnicodeString) of object;
@@ -15,7 +15,7 @@ type
     FPattern: TGXUnicodeString;
     FData: TGXUnicodeStringList;
     FOnFound: TFoundEvent;
-    FRegEx: TRegExpr;
+    FRegEx: TPerlRegEx;
     FCaseSensitive: Boolean;
     FWholeWord: Boolean;
     FRegularExpression: Boolean;
@@ -80,7 +80,7 @@ end;
 
 constructor TSearcher.Create;
 begin
-  FRegEx := TRegExpr.Create;
+  FRegEx := TPerlRegEx.Create;
 end;
 
 destructor TSearcher.Destroy;
@@ -161,8 +161,11 @@ begin // Execute
 
   if RegularExpression then
   begin
-    FRegEx.ModifierI := not CaseSensitive;
-    FRegEx.Expression := Pattern;
+    if CaseSensitive then
+      FRegEx.Options := FRegEx.Options - [preCaseLess]
+    else
+      FRegEx.Options := FRegEx.Options + [preCaseLess];
+    FRegEx.RegEx := UTF8Encode(Pattern);
     FRegEx.Compile;
   end;
 
@@ -366,12 +369,13 @@ var
   Line: TGXUnicodeString;
 begin
   Line := FData[LineNo];
-  if FRegEx.Exec(LineStr) then repeat
+  FRegEx.Subject := UTF8Encode(LineStr);
+  if FRegEx.Match then repeat
   begin
     //if FRegEx.SubExprMatchCount > 0 then
     //  raise Exception.Create('Subexpression searches are not supported');
-    StartCol := FRegEx.MatchPos[0];
-    EndCol := StartCol + FRegEx.MatchLen[0] - 1;
+    StartCol := Length(UTF8ToString(FRegEx.SubjectLeft))+1; // FRegEx.MatchPos[0];
+    EndCol := StartCol + Length(UTF8ToString(FRegEx.MatchedText)) - 1; // StartCol + FRegEx.MatchLen[0] - 1;
     Assert(StartCol > 0);
     Assert(EndCol > 0, 'Invalid regular expression match, try escaping any special characters using ''\''');
     if WholeWord then
@@ -379,7 +383,7 @@ begin
         Continue;
     if Assigned(FOnFound) then
       FOnFound(LineNo + 1, StartCol, EndCol, Line);
-  end until not FRegEx.ExecNext;
+  end until not FRegEx.MatchAgain;
 end;
 
 procedure TSearcher.SetFileName(const Value: string);

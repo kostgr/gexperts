@@ -117,7 +117,7 @@ implementation
 {$R *.dfm}
 
 uses
-  SysUtils, Windows, Messages, Graphics, Menus, RegExpr, Math,
+  SysUtils, Windows, Messages, Graphics, Menus, PerlRegEx, Math,
   GX_GenericUtils, GX_GxUtils, GX_OtaUtils, GX_GrepResults, GX_GrepOptions,
   GX_GrepRegExSearch, GX_dzVclUtils;
 
@@ -357,6 +357,7 @@ resourcestring
 var
   i: Integer;
   Dirs: TStringList;
+  RegEx: TPerlRegEx;
 begin
   if IsEmpty(cbText.Text) then
     raise Exception.Create(SSearchTextEmpty);
@@ -389,12 +390,19 @@ begin
 
   if cbRegEx.Checked then
   try
-    ExecRegExpr(cbText.Text, '');
+    RegEx := TPerlRegEx.Create;
+    try
+      RegEx.RegEx := UTF8Encode(cbText.Text);
+      RegEx.Compile;
+    finally
+      FreeAndNil(RegEx);
+    end;
+    //ExecRegExpr(cbText.Text, '');
   except
-    on E: ERegExpr do begin
+    on E: Exception do begin
       ShowError(E.Message);
       TryFocusControl(cbText);
-      cbText.SelStart := E.CompilerErrorPos;
+      cbText.SelStart := 0;
       cbText.SelLength := 0;
       Abort;
     end;

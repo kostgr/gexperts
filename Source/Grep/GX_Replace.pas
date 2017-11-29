@@ -13,7 +13,7 @@ function ReplaceLine(LineResult: TLineResult; GrepSettings: TGrepSettings): Inte
 
 implementation
 
-uses SysUtils, Controls, Dialogs, ToolsAPI, GX_OtaUtils, GX_GenericUtils, RegExpr;
+uses SysUtils, Controls, Dialogs, ToolsAPI, GX_OtaUtils, GX_GenericUtils, PerlRegEx;
 
 type
   ESkipFileReplaceException = class(Exception);
@@ -45,13 +45,18 @@ begin
   end;
 end;
 
-function ReplacePatternInStringWithRegEx(CurrentLine: TLineResult; GrepSettings: TGrepSettings; RegEx: TRegExpr): string;
+function ReplacePatternInStringWithRegEx(CurrentLine: TLineResult; GrepSettings: TGrepSettings; RegEx: TPerlRegEx): string;
 var
   i: Integer;
 begin
-  Result := RegEx.Replace(CurrentLine.Line, GrepSettings.Replace, True);
-  for i := CurrentLine.Matches.Count - 1 downto 0 do
-    CurrentLine.Matches[i].ShowBold := False;
+  RegEx.Subject := UTF8Encode(CurrentLine.Line);
+  RegEx.Replacement := UTF8Encode(GrepSettings.Replace);
+  if RegEx.ReplaceAll then
+  begin
+    Result := UTF8ToString(RegEx.Subject);
+    for i := CurrentLine.Matches.Count - 1 downto 0 do
+      CurrentLine.Matches[i].ShowBold := False;
+  end;
 end;
 
 function ReplaceAll(ResultList: TStrings; GrepSettings: TGrepSettings): Integer;
@@ -80,7 +85,7 @@ var
   Module: IOTAModule;
   EditWriter: IOTAEditWriter;
   SourceEditor: IOTASourceEditor;
-  RegEx: TRegExpr;
+  RegEx: TPerlRegEx;
   WasBinary: Boolean;
 
   procedure GetFileLines;
@@ -194,10 +199,14 @@ begin
   try
     if GrepSettings.RegEx then
     begin
-      RegEx := TRegExpr.Create;
-      RegEx.Expression := GrepSettings.Pattern;
-      RegEx.ModifierG := True;
-      RegEx.ModifierI := not GrepSettings.CaseSensitive;
+      RegEx := TPerlRegEx.Create;
+      RegEx.RegEx := UTF8Encode(GrepSettings.Pattern);
+      if GrepSettings.CaseSensitive then
+        RegEx.Options := RegEx.Options - [preCaseLess]
+      else
+        RegEx.Options := RegEx.Options + [preCaseLess];
+
+//      RegEx.ModifierG := True;
       RegEx.Compile;
     end;
 

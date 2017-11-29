@@ -42,7 +42,7 @@ interface
 uses
   Classes,
   ToolsAPI,
-  RegExpr, IniFiles,
+  PerlRegEx, IniFiles,
   GX_GrepRegExSearch, GX_GenericUtils;
 
 type
@@ -373,7 +373,7 @@ type
     FAbortSignalled: Boolean;
     FFileSearchCount: Integer;
     FMatchCount: Integer;
-    FExcludedDirsRegEx: TRegExpr;
+    FExcludedDirsRegEx: TPerlRegEx;
     FFileResult: TFileResult;
     FSearcher: TSearcher;
     FSearchRoot: string;
@@ -596,7 +596,8 @@ begin
           begin
             if (Search.Name <> '.') and (Search.Name <> '..') then
             begin
-              if IsEmpty(FGrepSettings.ExcludedDirs) or (not FExcludedDirsRegEx.Exec(Dir + Search.Name)) then
+              FExcludedDirsRegEx.Subject := UTF8Encode(Dir + Search.Name);
+              if IsEmpty(FGrepSettings.ExcludedDirs) or (not FExcludedDirsRegEx.Match) then
                 GrepDirectory(Dir + Search.Name, Mask);
             end;
           end;
@@ -632,7 +633,8 @@ begin
               if WildcardCompare(Masks.Strings[i], Search.Name, True) then
               begin
                 SearchFile := Dir + Search.Name;
-                if IsEmpty(FGrepSettings.ExcludedDirs) or (not FExcludedDirsRegEx.Exec(SearchFile)) then
+                FExcludedDirsRegEx.Subject := UTF8Encode(SearchFile);
+                if IsEmpty(FGrepSettings.ExcludedDirs) or (not FExcludedDirsRegEx.Match) then
                   ExecuteSearchOnFile(SearchFile, Context);
               end;
               FFileResult := nil;
@@ -683,7 +685,7 @@ begin
   FFileSearchCount := 0;
   FMatchCount := 0;
 
-  FExcludedDirsRegEx := TRegExpr.Create;
+  FExcludedDirsRegEx := TPerlRegEx.Create;
   try
     if NotEmpty(FGrepSettings.ExcludedDirs) then
     begin
@@ -692,9 +694,9 @@ begin
       while (i > 0) and (lExcludedDirs[i] = ';') do
         Dec(i);
       SetLength(lExcludedDirs, i);
-      lExcludedDirs := QuoteRegExprMetaChars(lExcludedDirs);
-      FExcludedDirsRegEx.Expression := StringReplace(lExcludedDirs, ';', '|', [rfReplaceAll]);
-      FExcludedDirsRegEx.ModifierI := True;
+      lExcludedDirs := FExcludedDirsRegEx.EscapeRegExChars(lExcludedDirs);
+      FExcludedDirsRegEx.RegEx := UTF8Encode(StringReplace(lExcludedDirs, ';', '|', [rfReplaceAll]));
+      FExcludedDirsRegEx.Options := FExcludedDirsRegEx.Options + [preCaseLess];
       try
         FExcludedDirsRegEx.Compile;
       except
