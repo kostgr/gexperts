@@ -153,6 +153,8 @@ begin
   EditView := GxOtaGetTopMostEditView;
   EditView.ConvertPos(False, EditPos, CharPos);
 
+  if (ColumnError > 0) and ((ColumnError mod 2) = 0) then
+    Inc(ColumnError);
   EditPos.Col := EditPos.Col + ColumnError;
 
   case ViewChangeType of
