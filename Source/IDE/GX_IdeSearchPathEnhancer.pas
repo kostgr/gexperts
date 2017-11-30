@@ -276,7 +276,7 @@ const
     DialogName: 'InheritedListEditDlg';
     DialogCaptionEn: 'Search Path';
     DialogCaptionFr: 'Chemin de recherche';
-    DialogCaptionDe: 'Verzeichnisse';
+    DialogCaptionDe: 'Suchpfad';
     );
 const
   LibrarySearchPathDlg: TSearchPathDlgStrings = (
@@ -483,7 +483,9 @@ begin
         FMakeRelativeBtn.Parent := FReplaceBtn.Parent;
         FMakeRelativeBtn.BoundsRect := FReplaceBtn.BoundsRect;
         FMakeRelativeBtn.Anchors := [akRight, akBottom];
-        FMakeRelativeBtn.Caption := 'Make Relative';
+        FMakeRelativeBtn.Caption := '> Relative';
+        FMakeRelativeBtn.Hint := 'Make current path relative';
+        FMakeRelativeBtn.ShowHint := True;
         FMakeRelativeBtn.Visible := False;
         FMakeRelativeBtn.OnClick := MakeRelativeBtnClick;
       end;
@@ -493,7 +495,9 @@ begin
         FMakeAbsoluteBtn.Parent := FDeleteBtn.Parent;
         FMakeAbsoluteBtn.BoundsRect := FDeleteBtn.BoundsRect;
         FMakeAbsoluteBtn.Anchors := [akRight, akBottom];
-        FMakeAbsoluteBtn.Caption := 'Make Absolute';
+        FMakeAbsoluteBtn.Caption := '> Absolute';
+        FMakeRelativeBtn.Hint := 'Make current path absolute';
+        FMakeRelativeBtn.ShowHint := True;
         FMakeAbsoluteBtn.Visible := False;
         FMakeAbsoluteBtn.OnClick := MakeAbsoluteBtnClick;
       end;
@@ -790,6 +794,8 @@ begin
   TrySetButtonVisibility(FAddRecursiveBtn, SwitchedToMemo);
   TrySetButtonVisibility(FReplaceBtn, not SwitchedToMemo);
   TrySetButtonVisibility(FMakeRelativeBtn, SwitchedToMemo);
+  TrySetButtonVisibility(FDelDotsBtn, SwitchedToMemo);
+  TrySetButtonVisibility(FAddDotsBtn, SwitchedToMemo);
 end;
 
 procedure TSearchPathEnhancer.UpBtnClick(_Sender: TObject);
