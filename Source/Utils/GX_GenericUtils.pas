@@ -704,11 +704,12 @@ function LinePosToCharPos(LinePos: TPoint; const Text: string): Integer;
 /// Converts a character position into line position (X/Y), so that
 /// StringList[LinePos.Y - 1][LinePos.X] = StringList.Text[CharPos]
 /// LinPos is a 1-based X/Y position
+/// ColumnError is a column index error needed for delphi to fix it UTF-8 bugs
 /// Examples:
 ///   CharPosToLinePos(5, '12345') = Point(5, 1)
 ///   CharPosToLinePos(8, '12345'#13#10'6789') = Point(1, 2)
 /// </summary>
-function CharPosToLinePos(CharPos: Integer; const Text: string): TPoint;
+function CharPosToLinePos(CharPos: Integer; const Text: string; out ColumnError: SmallInt): TPoint;
 
 // Convert a Windows message number into a string description
 function MessageName(Msg: Longint): string;
@@ -4153,15 +4154,17 @@ begin
   end;
 end;
 
-function CharPosToLinePos(CharPos: Integer; const Text: string): TPoint;
+function CharPosToLinePos(CharPos: Integer; const Text: string; out ColumnError: SmallInt): TPoint;
 var
   sl: TStringList;
   LineIdx: Integer;
   Offset: Integer;
   LineLen: Integer;
+  LeftLinePart: string;
 begin
   Assert(CharPos > 0);
 
+  ColumnError := 0;
   sl := TStringList.Create;
   try
     sl.Text := Text;
@@ -4172,6 +4175,8 @@ begin
       if Offset + LineLen > CharPos then begin
         Result.Y := LineIdx + 1;
         Result.X := CharPos - Offset;
+        LeftLinePart := Copy(sl[LineIdx], 1, Result.X - 1);
+        ColumnError := Length(UTF8Encode(LeftLinePart)) - Length(LeftLinePart);
         Exit;
       end else begin
         Inc(LineIdx);

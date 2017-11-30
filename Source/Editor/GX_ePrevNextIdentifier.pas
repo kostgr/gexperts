@@ -144,13 +144,16 @@ var
   CharPos: TOTACharPos;
   LinePos: TPoint;
   EditView: IOTAEditView;
+  ColumnError: SmallInt;
 begin
   FPosition := Value;
-  LinePos := CharPosToLinePos(FPosition, FSource);
+  LinePos := CharPosToLinePos(FPosition, FSource, ColumnError);
   CharPos.Line := LinePos.Y;
   CharPos.CharIndex := LinePos.X - 1;
   EditView := GxOtaGetTopMostEditView;
   EditView.ConvertPos(False, EditPos, CharPos);
+
+  EditPos.Col := EditPos.Col + ColumnError;
 
   case ViewChangeType of
     vctScrollCenter: GxOtaGotoEditPos(EditPos);
