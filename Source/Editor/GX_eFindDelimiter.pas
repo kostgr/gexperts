@@ -18,7 +18,8 @@ type
   public
     procedure DoDelimiterAction(Editor: IOTASourceEditor;
                                 Offset: Integer;
-                                SChar, EChar: TOTACharPos); virtual; abstract;
+                                SChar, EChar: TOTACharPos;
+                                SColumnError, EColumnError: SmallInt); virtual; abstract;
     procedure Execute(Sender: TObject); override;
     function HasConfigOptions: Boolean; override;
   end;
@@ -31,7 +32,8 @@ type
     function GetDisplayName: string; override;
     procedure DoDelimiterAction(Editor: IOTASourceEditor;
                                 Offset: Integer;
-                                SChar, EChar: TOTACharPos); override;
+                                SChar, EChar: TOTACharPos;
+                                SColumnError, EColumnError: SmallInt); override;
     function GetHelpString: string; override;
   end;
 
@@ -44,7 +46,8 @@ type
     function GetDisplayName: string; override;
     procedure DoDelimiterAction(Editor: IOTASourceEditor;
                                 Offset: Integer;
-                                SChar, EChar: TOTACharPos); override;
+                                SChar, EChar: TOTACharPos;
+                                SColumnError, EColumnError: SmallInt); override;
     function GetHelpString: string; override;
   end;
 
@@ -134,6 +137,9 @@ var
   Language: TSourceLanguage;
   Backward: Boolean;
   Offset: Integer;
+  ColumnErrorStart: SmallInt;
+  ColumnErrorEnd: SmallInt;
+
 
   function ExecutePas: Boolean;
   var
@@ -630,13 +636,13 @@ begin
   end;
 
   // A matching delimiter was found
-  Point := CharPosToLinePos(SPos + 1, FileContent);
+  Point := CharPosToLinePos(SPos + 1, FileContent, ColumnErrorStart);
   SChar.Line := Point.Y;
   SChar.CharIndex := Point.X - 1;
-  Point := CharPosToLinePos(EPos + 1, FileContent);
+  Point := CharPosToLinePos(EPos + 1, FileContent, ColumnErrorEnd);
   EChar.Line := Point.Y;
   EChar.CharIndex := Point.X - 1;
-  DoDelimiterAction(SourceEditor, Offset, SChar, EChar);
+  DoDelimiterAction(SourceEditor, Offset, SChar, EChar, ColumnErrorStart, ColumnErrorEnd);
 end;
 
 function TBaseDelimiterExpert.HasConfigOptions: Boolean;
@@ -653,7 +659,8 @@ begin
 end;
 
 procedure TMoveToDelimiter.DoDelimiterAction(Editor: IOTASourceEditor;
-  Offset: Integer; SChar, EChar: TOTACharPos);
+  Offset: Integer; SChar, EChar: TOTACharPos;
+  SColumnError, EColumnError: SmallInt);
 var
   EditView: IOTAEditView;
   EditPos: TOTAEditPos;
@@ -662,7 +669,7 @@ begin
 
   EditView.ConvertPos(False, EditPos, EChar);
 
-  EditPos.Col := EditPos.Col - Offset;
+  EditPos.Col := EditPos.Col - Offset + EColumnError;
   if EditPos.Col < 1 then
     EditPos.Col := 1;
 
@@ -703,19 +710,29 @@ begin
 end;
 
 procedure TLocateDelimiter.DoDelimiterAction(Editor: IOTASourceEditor;
-  Offset: Integer; SChar, EChar: TOTACharPos);
+  Offset: Integer; SChar, EChar: TOTACharPos;
+  SColumnError, EColumnError: SmallInt);
 var
   EditView: IOTAEditView;
   EditPos: TOTAEditPos;
 begin
   EditView := GxOtaGetTopMostEditView(Editor);
   EditView.ConvertPos(False, EditPos, SChar);
+  EditPos.Col := EditPos.Col + SColumnError;
   EditView.CursorPos := EditPos;
 
   if (EChar.Line > SChar.Line) or ((EChar.Line = SChar.Line) and (EChar.CharIndex > SChar.CharIndex)) then
+  begin
+    SChar.CharIndex := SChar.CharIndex + SColumnError;
+    EChar.CharIndex := EChar.CharIndex + EColumnError;
     GxOtaSelectBlock(Editor, SChar, EChar)
+  end
   else
+  begin
+    SChar.CharIndex := SChar.CharIndex + SColumnError;
+    EChar.CharIndex := EChar.CharIndex + EColumnError;
     GxOtaSelectBlock(Editor, EChar, SChar);
+  end;
 end;
 
 function TLocateDelimiter.GetDefaultShortCut: TShortCut;
