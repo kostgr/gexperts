@@ -445,6 +445,7 @@ begin
       FDelDotsBtn.Top := FPageControl.Top + FPageControl.Height;
       FDelDotsBtn.Anchors := [akRight, akBottom];
       FDelDotsBtn.Caption := 'Del ..\';
+      FDelDotsBtn.Visible := False;
       FDelDotsBtn.OnClick := DelDotsBtnClick;
 
       FAddDotsBtn := TButton.Create(_Form);
@@ -454,6 +455,7 @@ begin
       FAddDotsBtn.Top := FPageControl.Top + FPageControl.Height;
       FAddDotsBtn.Anchors := [akRight, akBottom];
       FAddDotsBtn.Caption := 'Add ..\';
+      FAddDotsBtn.Visible := False;
       FAddDotsBtn.OnClick := AddDotsBtnClick;
 
       if Assigned(FUpBtn) then begin
@@ -484,7 +486,7 @@ begin
         FMakeRelativeBtn.BoundsRect := FReplaceBtn.BoundsRect;
         FMakeRelativeBtn.Anchors := [akRight, akBottom];
         FMakeRelativeBtn.Caption := '> Relative';
-        FMakeRelativeBtn.Hint := 'Make current path relative';
+        FMakeRelativeBtn.Hint := 'Make all paths relative';
         FMakeRelativeBtn.ShowHint := True;
         FMakeRelativeBtn.Visible := False;
         FMakeRelativeBtn.OnClick := MakeRelativeBtnClick;
@@ -496,7 +498,7 @@ begin
         FMakeAbsoluteBtn.BoundsRect := FDeleteBtn.BoundsRect;
         FMakeAbsoluteBtn.Anchors := [akRight, akBottom];
         FMakeAbsoluteBtn.Caption := '> Absolute';
-        FMakeRelativeBtn.Hint := 'Make current path absolute';
+        FMakeRelativeBtn.Hint := 'Make all paths absolute';
         FMakeRelativeBtn.ShowHint := True;
         FMakeAbsoluteBtn.Visible := False;
         FMakeAbsoluteBtn.OnClick := MakeAbsoluteBtnClick;
@@ -685,13 +687,13 @@ begin
   try
     for i := 0 to FMemo.Lines.Count - 1 do begin
       RelativeDir := FMemo.Lines[i];
-      if not StartsText('$(BDS)\', RelativeDir) then begin
+      if not StartsText('$(', RelativeDir) then begin
         AbsoluteDir := TFileSystem.ExpandFileNameRelBaseDir(RelativeDir, ProjectDir);
         FMemo.Lines[i] := AbsoluteDir;
       end;
     end;
     RelativeDir := FEdit.Text;
-    if not StartsText('$(BDS)\', RelativeDir) then begin
+    if not StartsText('$(', RelativeDir) then begin
       AbsoluteDir := TFileSystem.ExpandFileNameRelBaseDir(RelativeDir, ProjectDir);
       FEdit.Text := AbsoluteDir;
     end;
@@ -716,13 +718,13 @@ begin
   try
     for i := 0 to FMemo.Lines.Count - 1 do begin
       AbsoluteDir := FMemo.Lines[i];
-      if not StartsText('$(BDS)\', AbsoluteDir) then begin
+      if not StartsText('$(', AbsoluteDir) then begin
         RelativeDir := ExtractRelativePath(IncludeTrailingPathDelimiter(ProjectDir), AbsoluteDir);
         FMemo.Lines[i] := RelativeDir;
       end;
     end;
     AbsoluteDir := FEdit.Text;
-    if not StartsText('$(BDS)\', AbsoluteDir) then begin
+    if not StartsText('$(', AbsoluteDir) then begin
       RelativeDir := ExtractRelativePath(IncludeTrailingPathDelimiter(ProjectDir), AbsoluteDir);
       FEdit.Text := RelativeDir;
     end;
