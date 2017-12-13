@@ -150,8 +150,8 @@ procedure TGX_Expert.LoadActiveAndShortCut(Settings: TGExpertsSettings);
 begin
   // Do not put these two Settings.xxx lines in InternalLoadSettings,
   // since a descendant might forget to call 'inherited'
-  ShortCut := Settings.ReadInteger(ShortCutIdent, GetName, ShortCut);
   Active := Settings.ReadBool(EnabledIdent, GetName, IsDefaultActive);
+  ShortCut := Settings.ReadInteger(ShortCutIdent, GetName, ShortCut);
 end;
 
 procedure TGX_Expert.SaveActiveAndShortCut(Settings: TGExpertsSettings);
@@ -190,7 +190,12 @@ procedure TGX_Expert.SetShortCut(Value: TShortCut);
 begin
   FShortCut := Value;
   if Assigned(FAction) then
-    FAction.ShortCut := FShortCut;
+  begin
+    if Active then
+      FAction.ShortCut := FShortCut
+	else
+	  FAction.ShortCut := 0;
+  end;
 end;
 
 { Globals }

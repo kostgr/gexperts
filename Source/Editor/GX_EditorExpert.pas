@@ -10,6 +10,7 @@ type
   TEditorExpert = class(TGX_BaseExpert)
   private
     FGxAction: IGxAction;
+    FShortCut: TShortCut;
     FActionName: string;
   protected
     function GetShortCut: TShortCut; override;
@@ -121,15 +122,14 @@ end;
 
 function TEditorExpert.GetShortCut: TShortCut;
 begin
-  Assert(Assigned(FGxAction));
-  Result := FGxAction.ShortCut
+  Result := FShortCut;
 end;
 
 procedure TEditorExpert.LoadActiveAndShortCut(Settings: TGExpertsSettings);
 begin
   inherited;
-  ShortCut := Settings.ReadInteger(ConfigurationKey, 'ShortCut', ShortCut);
   Active := Settings.ReadBool(ConfigurationKey, 'Active', IsDefaultActive);
+  ShortCut := Settings.ReadInteger(ConfigurationKey, 'ShortCut', ShortCut);
 end;
 
 procedure TEditorExpert.SaveActiveAndShortCut(Settings: TGExpertsSettings);
@@ -141,8 +141,12 @@ end;
 
 procedure TEditorExpert.SetShortCut(Value: TShortCut);
 begin
+  FShortCut := Value;
   Assert(Assigned(FGxAction));
-  FGxAction.ShortCut := Value;
+  if Active then
+    FGxAction.ShortCut := Value
+  else
+    FGxAction.ShortCut := 0;
 end;
 
 function TEditorExpert.CanHaveShortCut: boolean;

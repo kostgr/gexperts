@@ -3933,7 +3933,7 @@ var
   EditReaderPos: Integer;
   ReadDataSize: Integer;
   Buffer: array[0..EditReaderBufferSize] of AnsiChar; // Array of bytes, might be UTF-8
-  begin
+begin
   Assert(EditReader <> nil);
   Assert(Stream <> nil);
 
