@@ -3,6 +3,7 @@ library GExpertsRS2010;
 {$E dll}
 
 uses
+  SysUtils,
   GX_About in '..\..\source\Framework\GX_About.pas' {fmAbout},
   GX_ActionBroker in '..\..\source\Framework\GX_ActionBroker.pas',
   GX_Actions in '..\..\source\Framework\GX_Actions.pas',
@@ -230,6 +231,44 @@ uses
 
 {$R '..\..\images\GXIcons.res' '..\..\images\GXIcons.rc'}
 {$R *_version.res}
+
+function GxFindAndOpenMethod(AFileName, AClassName, AMethodName: PWideChar): Boolean; stdcall;
+var
+  LData: TGXStringList;
+  LWasBinary: Boolean;
+  I: Integer;
+  LIdx: Integer;
+  LFileName: string;
+  LClassName: string;
+  LMethodName: string;
+begin
+  Result := False;
+
+
+  LFileName := WideCharToString(AFileName);
+  LClassName := WideCharToString(AClassName);
+  LMethodName := WideCharToString(AMethodName);
+
+  LData := TGXStringList.Create;
+  try
+    GxOtaLoadIDEFileToUnicodeStrings(LFileName, LData, LWasBinary);
+    for I := 0 to LData.Count - 1 do
+    begin
+      LIdx := AnsiCaseInsensitivePos(LClassName+'.'+LMethodName, LData[I]);
+      if LIdx > 0 then
+      begin
+        GxOtaGoToFileLineColumn(LFileName, I);
+        Result := True;
+        Break;
+      end;
+    end;
+  finally
+    FreeAndNil(LData);
+  end;
+end;
+
+exports
+  GxFindAndOpenMethod;
 
 begin
 end.
