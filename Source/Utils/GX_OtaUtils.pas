@@ -4474,6 +4474,12 @@ begin
     MemStream.Position := 0;
     {$IFDEF UNICODE}
     Data.LoadFromStream(MemStream, TEncoding.UTF8);
+    if (Data.Count = 0) and (MemStream.Size > 0) then
+    begin
+      // KT 25.01.2018 - Fall back to ASCII for the case of broken UTF8 encoding (invalid character).
+      MemStream.Position := 0;
+      Data.LoadFromStream(MemStream, TEncoding.Default);
+    end;
     {$ELSE}
     if RunningDelphi8OrGreater then
       SynUnicode.LoadFromStream(Data, MemStream, seUTF8)
