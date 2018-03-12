@@ -257,7 +257,7 @@ begin
       LIdx := AnsiCaseInsensitivePos(LClassName+'.'+LMethodName, LData[I]);
       if LIdx > 0 then
       begin
-        GxOtaGoToFileLineColumn(LFileName, I);
+        GxOtaGoToFileLine(LFileName, I+1);
         Result := True;
         Break;
       end;
